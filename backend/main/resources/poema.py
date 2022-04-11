@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
 
-#Diccionario de prueba
+#Prueba 
 POEMS = {
     1 : {'Título' : 'La canción del pirata' ,'Autor' : 'José de Espronceda'},
     2 : {'Título' : 'A una rosa' ,'Autor' : 'Gongora'},

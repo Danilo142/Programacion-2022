@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import request
 
 USUARIOS = {
-    1 : {'firstname' : 'Joaquin', 'lastname' : 'Viñolo'},
+    1 : {'firstname' : 'Joaquin', 'lastname' : 'Vinolo'},
     2 : {'firstname' : 'Martin', 'lastname' : 'Gonzales'},
     3 : {'firstname' : 'Lucas', 'lastname' : 'Ollarce'},
     4 : {'firstname' : 'Gaston', 'lastname' : 'Fenske'},
@@ -20,6 +20,16 @@ class User(Resource):
             return USUARIOS[int(id)]
         return '', 404
 
+
+    def put(self, id):
+        if int(id) in USUARIOS:
+            user = USUARIOS[int(id)]
+            data = request.get_json()
+            user.update(data)
+            return user, 201
+        return '', 404
+
+
 class Users(Resource):
     def get(self):
         return USUARIOS
@@ -29,3 +39,5 @@ class Users(Resource):
         id = int(max(USUARIOS.key())) + 1
         USUARIOS[id] = user
         return USUARIOS[id], 201
+
+

@@ -1,32 +1,29 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, jsonify
+from .. import db
+from main.models import PoemaModel
 
-#Prueba 
-POEMS = {
-    1 : {'Titulo' : 'La cancion del pirata' ,'Autor' : 'Jose de Espronceda'},
-    2 : {'Titulo' : 'A una rosa' ,'Autor' : 'Gongora'},
-    3 : {'Titulo' : 'Ir y quedarse' ,'Autor' : 'Lope de Vega'},
-    4 : {'Titulo' : 'Hija del viento' ,'Autor' : 'Alejandra Pizarnik'},
-    5 : {'Titulo' : 'El remordimiento' ,'Autor' : 'Jorge Luis Borges'}
-}
+
 
 class Poem(Resource):
     def get(self, id):
-        if int(id) in POEMS:
-            return POEMS[int(id)]
-        return '', 404
+       poem = db.session.query(PoemaModel).get_or_404(id)
+       return poem.to_json()
 
     def delete(self, id):
-        if int(id) in POEMS:
-            return POEMS[int(id)]
-        return '', 404
+          poem = db.session.query(PoemaModel).get_or_404(id)
+          db.session.delete(poem)
+          db.session.commit()
+
 
 class Poems(Resource):
     def get(self):
-        return POEMS
+        poems = db.session.query(PoemaModel).all()
+        return jsonify([poem.to_json_short() for poem in poems])
 
     def post(self):
-        poem = request.get_json()
-        id = int(max(POEMS.key())) + 1
-        POEMS[id] = poem
-        return POEMS[id], 201
+        poem = PoemaModel.from_json(request.get_json())
+        db.session.add(poem)
+        db.session.commit()
+        return poem.to_json(), 201
+

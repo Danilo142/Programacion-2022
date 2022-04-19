@@ -1,43 +1,42 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, jsonify
+from .. import db
+from main.models import UsuarioModel
 
-USUARIOS = {
-    1 : {'firstname' : 'Joaquin', 'lastname' : 'Vinolo'},
-    2 : {'firstname' : 'Martin', 'lastname' : 'Gonzales'},
-    3 : {'firstname' : 'Lucas', 'lastname' : 'Ollarce'},
-    4 : {'firstname' : 'Gaston', 'lastname' : 'Fenske'},
-    5 : {'firstname' : 'Enzo', 'lastname' : 'Fernandez'}
-}
+
 
 class User(Resource):
-    def get(self, id):
-        if int(id) in USUARIOS:
-            return USUARIOS[int(id)]
-        return '', 404
-
-    def delete(self, id):
-        if int(id) in USUARIOS:
-            return USUARIOS[int(id)]
-        return '', 404
+  def get(self, id):
+        user = db.session.query(UsuarioModel).get_or_404(id)
+        return user.to_json()
 
 
-    def put(self, id):
-        if int(id) in USUARIOS:
-            user = USUARIOS[int(id)]
-            data = request.get_json()
-            user.update(data)
-            return user, 201
-        return '', 404
+  def delete(self, id):
+        user = db.session.query(UsuarioModel).get_or_404(id)
+        return user.to_json()
+
+
+  def put(self, id):
+    user = db.session.query(UsuarioModel).get_or_404(id)
+    data = request.get_json().items()
+    for key, value in data:
+            setattr(user, key, value)
+    db.session.add(user)
+    db.session.commit()
+    return user.to_json() , 201
+
 
 
 class Users(Resource):
     def get(self):
-        return USUARIOS
+        users = db.session.query(UsuarioModel).all()
+        return jsonify([user.to_json_short() for user in users])
+
 
     def post(self):
-        user = request.get_json()
-        id = int(max(USUARIOS.key())) + 1
-        USUARIOS[id] = user
-        return USUARIOS[id], 201
+        user = UsuarioModel.from_json(request.get_json())
+        db.session.add(user)
+        db.session.commit()
+        return user.to_json(), 201
 
 

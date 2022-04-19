@@ -1,31 +1,29 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, jsonify
+from .. import db
+from main.models import CalificacionModel
 
-CALIFICACIONES = {
-    1 : {'calification' : 5},
-    2 : {'calification' : 4},
-    3 : {'calification' : 3},
-    4 : {'calification' : 2},
-    5 : {'calification' : 1}
-}
 
-class Calification(Resource):
-    def get(self, id):
-        if int(id) in CALIFICACIONES:
-            return CALIFICACIONES[int(id)]
-        return '', 404
+class Qualification(Resource):
+   def get(self, id):
+        qualification = db.session.query(CalificacionModel).get_or_404(id)
+        return qualification.to_json()
 
-    def delete(self, id):
-        if int(id) in CALIFICACIONES:
-            return CALIFICACIONES[int(id)]
-        return '', 404
+   def delete(self, id):
+        qualification = db.session.query(CalificacionModel).get_or_404(id)
+        db.session.delete(qualification)
+        db.session.commit()
+        return '', 204
+
 
 class Califications(Resource):
     def get(self):
-        return CALIFICACIONES
+        qualifications = db.session.query(CalificacionModel).all()
+        return jsonify([qualification.to_json_short() for qualification in qualifications])
+
 
     def post(self):
-        calification = request.get_json()
-        id = int(max(CALIFICACIONES.key())) + 1
-        CALIFICACIONES[id] = calification
-        return CALIFICACIONES[id], 201
+         qualification = CalificacionModel.from_json(request.get_json())
+         db.session.add(qualification)
+         db.session.commit()
+         return qualification.to_json(), 201

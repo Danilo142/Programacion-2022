@@ -25,12 +25,10 @@ class Usuario(db.Model):
     def to_json_short(self):
         usuario_json = {
             'id': self.id,
+            'firstname': str(self.firstname),
             'lastname': str(self.lastname),
-            'password': str(self.password),
-            
-
-
-        }
+            'roll': str(self.roll),
+            }
         return usuario_json
     @staticmethod
     
@@ -38,7 +36,13 @@ class Usuario(db.Model):
         id = usuario_json.get('id')
         firstname = usuario_json.get('firstname')
         lastname = usuario_json.get('lastname')
+        password = usuario_json.get('password')
+        email = usuario_json.get('email')
+        roll = usuario_json.get('roll')
         return Usuario(id=id,
                     firstname=firstname,
                     lastname=lastname,
+                    password=password,
+                    roll=roll,
+                    email=email,
                     )
